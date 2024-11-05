@@ -1,0 +1,23 @@
+ function Backup-Directory {
+    param (
+        [string]$sourcePath,
+        [string]$destinationPath
+    )
+
+    if (-Not (Test-Path -Path $sourcePath)) {
+        Write-Host "La ruta d'origen no existeix: $sourcePath"
+        return
+    }
+
+    if (-Not (Test-Path -Path $destinationPath)) {
+        New-Item -ItemType Directory -Path $destinationPath
+        Write-Host "S'ha creat la ruta de destí: $destinationPath"
+    }
+
+    try {
+        Copy-Item -Path $sourcePath -Destination $destinationPath -Force
+        Write-Host "Còpia de seguretat realitzada correctament de $sourcePath a $destinationPath"
+    } catch {
+        Write-Host "S'ha produït un error durant la còpia de seguretat: $_"
+    }
+}

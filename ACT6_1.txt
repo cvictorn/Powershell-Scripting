@@ -1,0 +1,11 @@
+function Buscar {
+    param (
+        [string]$filePath
+    )
+
+    if (Test-Path -Path $filePath) {
+        Write-Host "El fitxer existeix: $filePath"
+    } else {
+        Write-Host "El fitxer NO existeix."
+    }
+}
