@@ -1,0 +1,23 @@
+function Calcu {
+    param (
+        [double]$valor1,
+        [double]$valor2,
+        [string]$operacio
+    )
+
+    switch ($operacio) {
+        '+' { return $valor1 + $valor2 }
+        '-' { return $valor1 - $valor2 }
+        '*' { return $valor1 * $valor2 }
+        '/' {
+            if ($valor2 -eq 0) {
+                Write-Output "Error: No es pot dividir per zero."
+                return
+            }
+            return $valor1 / $valor2
+        }
+        default {
+            Write-Output "Operació no vàlida. Utilitza '+', '-', '*', o '/'."
+        }
+    }
+}

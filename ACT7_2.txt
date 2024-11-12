@@ -1,0 +1,36 @@
+function ComprovaExistenciaFitxer {
+    param (
+        [string]$nomFitxer,
+        [string]$rutaInicial = "C:\"
+    )
+
+    Write-Output "Cercant el fitxer '$nomFitxer' a la ruta: $rutaInicial..."
+
+    $resultats = Get-ChildItem -Path $rutaInicial -Filter "$nomFitxer" -Recurse -ErrorAction SilentlyContinue -Force
+
+    if ($resultats) {
+        Write-Output "S'han trobat els següents fitxers:"
+        $resultats | ForEach-Object { Write-Output $_.FullName }
+    } else {
+        Write-Output "No s'ha trobat el fitxer $nomFitxer."
+    }
+
+    do {
+        $resposta = Read-Host "Vols continuar cercant un altre fitxer (C) o finalitzar (F)?"
+        if ($resposta -match '^[cC]$') {
+            $nouFitxer = Read-Host "Introdueix el nom d'un altre fitxer per comprovar"
+            $novaRuta = Read-Host "Especifica una ruta (o prem Enter per utilitzar $rutaInicial)"
+            if (-not [string]::IsNullOrWhiteSpace($novaRuta)) {
+                ComprovaExistenciaFitxer -nomFitxer $nouFitxer -rutaInicial $novaRuta
+            } else {
+                ComprovaExistenciaFitxer -nomFitxer $nouFitxer -rutaInicial $rutaInicial
+            }
+            break
+        } elseif ($resposta -match '^[fF]$') {
+            Write-Output "Script finalitzat."
+            break
+        } else {
+            Write-Output "Resposta no vàlida. Escriu 'C' per continuar o 'F' per finalitzar."
+        }
+    } while ($true)
+}
