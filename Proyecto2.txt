@@ -1,0 +1,19 @@
+En ubuntu funciona este código modificando la ruta de donde se encuentra "/usr/bin/VBoxManage"
+
+$vmName = "NovaMaquina"
+$vboxManage = "/usr/bin/VBoxManage"
+if (-Not (Test-Path $vboxManage)) {
+    Write-Error "VBoxManage no trobat. Comprova la instal·lació de VirtualBox."
+    exit 1
+}
+$existingVMs = & $vboxManage list vms
+if ($existingVMs -match $vmName) {
+    Write-Host "La màquina virtual $vmName ja existeix. S'està eliminant..."
+    & $vboxManage unregistervm $vmName --delete
+}
+& $vboxManage createvm --name $vmName --register
+& $vboxManage modifyvm $vmName --nic1 intnet --intnet1 "XarxaInterna"  # Primera targeta en mode Interna
+for ($i = 2; $i -le 8; $i++) {
+    & $vboxManage modifyvm $vmName --nic$i nat
+}
+Write-Host "S'han configurat 8 targetes de xarxa: 1 en interna i 7 en NAT."
