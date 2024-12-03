@@ -1,0 +1,60 @@
+$vboxManage = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
+
+if (-Not (Test-Path $vboxManage)) {
+    Write-Host "VBoxManage no trobat. Comprova la instal·lació de VirtualBox."
+    exit 1
+}
+
+$vmName = Read-Host "Introdueix el nom de la màquina virtual que vols gestionar"
+
+$existingVMs = & $vboxManage list vms
+if (-Not ($existingVMs -match $vmName)) {
+    Write-Host "La màquina virtual '$vmName' no existeix."
+    exit 1
+}
+
+Write-Host "Selecciona una opció:"
+Write-Host "1) Encendre la màquina virtual"
+Write-Host "2) Desar l'estat de la màquina virtual"
+Write-Host "3) Aturar la màquina virtual"
+$option = Read-Host "Introdueix el número de l'opció"
+
+switch ($option) {
+    1 {
+        $vmState = & $vboxManage showvminfo "$vmName" --machinereadable | Select-String "VMState="
+        if ($vmState -match "running") {
+            Write-Host "La màquina virtual ja està encesa."
+        } else {
+            & $vboxManage startvm "$vmName" --type headless
+            Write-Host "La màquina virtual s'ha engegat correctament."
+        }
+    }
+    2 {
+        $vmState = & $vboxManage showvminfo "$vmName" --machinereadable | Select-String "VMState="
+        if ($vmState -match "running") {
+            & $vboxManage controlvm "$vmName" savestate
+            Write-Host "L'estat de la màquina s'ha desat correctament."
+        } else {
+            Write-Host "La màquina virtual no està en funcionament."
+        }
+    }
+    3 {
+        $vmState = & $vboxManage showvminfo "$vmName" --machinereadable | Select-String "VMState="
+        if ($vmState -match "running") {
+            & $vboxManage controlvm "$vmName" acpipowerbutton
+            Start-Sleep -Seconds 5
+            $newState = & $vboxManage showvminfo "$vmName" --machinereadable | Select-String "VMState="
+            if ($newState -match "running") {
+                & $vboxManage controlvm "$vmName" poweroff
+                Write-Host "S'ha forçat l'aturada de la màquina virtual."
+            } else {
+                Write-Host "La màquina virtual s'ha aturat correctament."
+            }
+        } else {
+            Write-Host "La màquina virtual ja està aturada."
+        }
+    }
+    Default {
+        Write-Host "Opció no vàlida."
+    }
+}
